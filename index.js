@@ -19,10 +19,11 @@ if(config.timer == '') {
 }
 
 client.on('message', message => {
-	const regex = /(\scum\s|^cum\s|\scum$|^cum$)/;
-	if(regex.test(message.content)) {
-		const timeSinceLastCum = Date.now() - config.timer;
-		const responseMessage = require('./messageFormatter.js').getFormattedMessage(timeSinceLastCum);
+	const regex = /(\sword\s|^word\s|\sword$|^word$)/;
+	// 60,000 is amount of ms in a minute
+	if(regex.test(message.content) && Date.now - config.timer > config.cooldownTimerMinutes * 60000) {
+		const timeSinceLastMessage = Date.now() - config.timer;
+		const responseMessage = require('./messageFormatter.js').getFormattedMessage(timeSinceLastMessage);
 		message.channel.send(responseMessage);
 		config.timer = Date.now();
 		fs.writeFile('config.json', JSON.stringify(config), function(err) {
