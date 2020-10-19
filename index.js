@@ -19,7 +19,7 @@ if(config.timer == '') {
 }
 
 client.on('message', message => {
-	const regex = /(\sword\s|^word\s|\sword$|^word$)/;
+	const regex = /(\sword\s|^word\s|\sword$|^word$)/i;
 	// 60,000 is amount of ms in a minute
 	if(regex.test(message.content) && Date.now() - config.timer > config.cooldownTimerMinutes * 60000) {
 		const timeSinceLastMessage = Date.now() - config.timer;
