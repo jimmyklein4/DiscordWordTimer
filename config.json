@@ -1,1 +1,10 @@
-{"prefix":"!","timer":1603072051520,"cooldownTimerMinutes":60}
+{
+    "guilds": [
+        {
+            "id": "t",
+            "prefix": "!",
+            "timer": 1603072051520,
+            "cooldownTimerMinutes": 60
+        }
+    ]
+}

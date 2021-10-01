@@ -1,37 +1,46 @@
 const fs = require('fs');
-const Discord = require('discord.js');
+const { Client, Intents } = require('discord.js');
 
 const config = require('./config.json');
 const auth = require('./auth.json');
-const client = new Discord.Client();
+const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 
 client.once('ready', () => {
 	console.log('ready!');
+	console.log(client.guilds);
 });
 
-if(config.timer == '') {
-	config.timer = Date.now();
-	fs.writeFile('config.json', JSON.stringify(config), function(err) {
-		if(err) {
-			console.log(err);
-		}
-	});
-}
-
-client.on('message', message => {
-	if(message.author.bot) {
+client.on('interactionCreate', async interaction => {
+	console.log(interaction);
+	if (interaction.message.author.bot) {
 		return;
 	}
-	const regex = /(\sword\s|^word\s|\sword$|^word$|\sword\W|^word\W)/i;
-	// 60,000 is amount of ms in a minute
 
-	if(regex.test(message.content) && Date.now() - config.timer > config.cooldownTimerMinutes * 60000) {
-		const timeSinceLastMessage = Date.now() - config.timer;
-		const responseMessage = require('./messageFormatter.js').getFormattedMessage(timeSinceLastMessage);
-		message.channel.send(responseMessage);
-		config.timer = Date.now();
+	const regex = /(\sword\s|^word\s|\sword$|^word$|\sword\W|^word\W)/i;
+
+	let haveGuildInConfig = false;
+	for (let i = 0; i < config.guilds.length; i++) {
+		if (config.guilds[i].id === interaction.message.guildId) {
+			haveGuildInConfig = true;
+			// 60,000 is amount of ms in a minute
+			if (regex.test(interaction.message.content) && Date.now() - config.guilds[i].timer > config.guilds[i].cooldownTimerMinutes * 60000) {
+				const timeSinceLastMessage = Date.now() - config.guilds[i].timer;
+				const responseMessage = require('./messageFormatter.js').getFormattedMessage(timeSinceLastMessage);
+				interaction.message.channel.send(responseMessage);
+				config.guilds[i].timer = Date.now();
+				fs.writeFile('config.json', JSON.stringify(config), function(err) {
+					if (err) {
+						console.log(err);
+					}
+				});
+			}
+		}
+	}
+
+	if (!haveGuildInConfig) {
+		config.guilds.push({ id : interaction.message.guildId, prefix: '!', timer: Date.now(), cooldownTimerMinutes: 1 });
 		fs.writeFile('config.json', JSON.stringify(config), function(err) {
-			if(err) {
+			if (err) {
 				console.log(err);
 			}
 		});
