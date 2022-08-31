@@ -16,13 +16,19 @@ client.on('messageCreate', message => {
 		return;
 	}
 
-	const regex = /(\sword\s|^word\s|\sword$|^word$|\sword\W|^word\W)/i;
-
 	let haveGuildInConfig = false;
 	for (let i = 0; i < config.guilds.length; i++) {
 		if (config.guilds[i].id === message.guildId) {
+			let searchWord = config.guilds[i].searchWord;
+			console.log(searchWord);
+			if(!searchWord) {
+				searchWord = 'test';
+			}
+			const regex = new RegExp('\\s' + searchWord + '\\s|^' + searchWord + '\\s|\\s' + searchWord + '$|^' + searchWord + '$|\\s' + searchWord + '\\W|^' + searchWord + '\\W', 'i');
+			// const regex = /(\sword\s|^word\s|\sword$|^word$|\sword\W|^word\W)/i;
 			haveGuildInConfig = true;
 			// 60,000 is amount of ms in a minute
+			console.log(regex);
 			if (regex.test(message.content) && Date.now() - config.guilds[i].timer > config.guilds[i].cooldownTimerMinutes * 60000) {
 				const timeSinceLastMessage = Date.now() - config.guilds[i].timer;
 				const responseMessage = require('./messageFormatter.js').getFormattedMessage(timeSinceLastMessage);
