@@ -31,7 +31,7 @@ client.on('messageCreate', message => {
 			console.log(regex);
 			if (regex.test(message.content) && Date.now() - config.guilds[i].timer > config.guilds[i].cooldownTimerMinutes * 60000) {
 				const timeSinceLastMessage = Date.now() - config.guilds[i].timer;
-				const responseMessage = require('./messageFormatter.js').getFormattedMessage(timeSinceLastMessage);
+				const responseMessage = require('./messageFormatter.js').getFormattedMessage(timeSinceLastMessage, searchWord);
 				message.channel.send(responseMessage);
 				config.guilds[i].timer = Date.now();
 				fs.writeFile('config.json', JSON.stringify(config), function(err) {
