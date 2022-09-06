@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 // import config from './config.json' assert{type: 'json'};
 import { writeFile } from 'fs';
-import { getFormattedMessage } from './messageFormatter.js';
+import { formattedTime } from './messageFormatter.js';
 
 const config = JSON.parse(readFileSync('./config.json'));
 
@@ -30,9 +30,15 @@ export function createMessage(message) {
 			if (regex.test(message.content) && Date.now() - config.guilds[i].timer > config.guilds[i].cooldownTimerMinutes * 60000) {
 				console.log('Should send message');
 				const timeSinceLastMessage = Date.now() - config.guilds[i].timer;
-				const responseMessage = getFormattedMessage(timeSinceLastMessage, searchWord);
+				const responseMessage = 'Time since last ' + searchWord + ': ' + formattedTime(timeSinceLastMessage);
 				message.channel.send(responseMessage);
 				config.guilds[i].timer = Date.now();
+				if(config.guilds[i].longesttime && config.guilds[i].longesttime < timeSinceLastMessage) {
+					config.guilds[i].longesttime = timeSinceLastMessage;
+				} else if(!config.guilds[i].longesttime) {
+					config.guilds[i].longesttime = timeSinceLastMessage;
+				}
+
 				writeFile('config.json', JSON.stringify(config), function(err) {
 					if (err) {
 						console.log(err);
