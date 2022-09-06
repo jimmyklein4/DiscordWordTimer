@@ -1,5 +1,4 @@
 import { readFileSync } from 'fs';
-
 // import config from './config.json' assert{type: 'json'};
 import { writeFile } from 'fs';
 import { getFormattedMessage } from './messageFormatter.js';
@@ -25,7 +24,11 @@ export function createMessage(message) {
 			haveGuildInConfig = true;
 			// 60,000 is amount of ms in a minute
 			console.log(regex);
+			if (regex.test(message.content)) {
+				console.log('Message content is good');
+			}
 			if (regex.test(message.content) && Date.now() - config.guilds[i].timer > config.guilds[i].cooldownTimerMinutes * 60000) {
+				console.log('Should send message');
 				const timeSinceLastMessage = Date.now() - config.guilds[i].timer;
 				const responseMessage = getFormattedMessage(timeSinceLastMessage, searchWord);
 				message.channel.send(responseMessage);
@@ -41,7 +44,7 @@ export function createMessage(message) {
 
 	if (!haveGuildInConfig) {
 		// TODO: Need to add search word config in here
-		guilds.push({ id : message.guildId, prefix: '!', timer: Date.now(), cooldownTimerMinutes: 1 });
+		config.guilds.push({ id : message.guildId, prefix: '!', timer: Date.now(), cooldownTimerMinutes: 1 });
 		writeFile('config.json', JSON.stringify(config), function(err) {
 			if (err) {
 				console.log(err);
