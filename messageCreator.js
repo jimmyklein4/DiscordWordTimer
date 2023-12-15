@@ -1,10 +1,10 @@
 import { readFileSync } from 'fs';
 import { writeFile } from 'fs';
+import { formattedTime } from './messageFormatter.js';
 
 const config = JSON.parse(readFileSync('./config.json'));
 
 export function createMessage(message) {
-    console.log(message);
 	if (message.author.bot) {
 		return;
 	}
@@ -15,6 +15,9 @@ export function createMessage(message) {
 			const searchWord = config.guilds[i].searchWord;
 			// const regex = /(\sword\s|^word\s|\sword$|^word$|\sword\W|^word\W)/i;
 			haveGuildInConfig = true;
+			if (isMessageGood(message.content, searchWord)) {
+				console.log('good');
+			}
 			// 60,000 is amount of ms in a minute
 			if (isMessageGood(message.content, searchWord) && Date.now() - config.guilds[i].timer > config.guilds[i].cooldownTimerMinutes * 60000) {
 				console.log('Should send message');
@@ -56,9 +59,3 @@ function isMessageGood(message, searchWord) {
 	return regex.test(message);
 }
 
-function formattedTime(lastMessageTime) {
-    return (Math.floor(lastMessageTime / 86400000) + ' days, ' +
-    Math.floor((lastMessageTime % 86400000) / 3600000) + ' hours, ' +
-    Math.floor((lastMessageTime % 3600000) / 60000) + ' minutes, ' +
-    Math.floor((lastMessageTime % 60000) / 1000) + ' seconds');
-}
