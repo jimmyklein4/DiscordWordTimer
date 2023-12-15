@@ -1,7 +1,5 @@
 import { readFileSync } from 'fs';
-// import config from './config.json' assert{type: 'json'};
 import { writeFile } from 'fs';
-import { formattedTime } from './messageFormatter.js';
 
 const config = JSON.parse(readFileSync('./config.json'));
 
@@ -14,20 +12,11 @@ export function createMessage(message) {
 	let haveGuildInConfig = false;
 	for (let i = 0; i < config.guilds.length; i++) {
 		if (config.guilds[i].id === message.guildId) {
-			let searchWord = config.guilds[i].searchWord;
-			console.log(searchWord);
-			if(!searchWord) {
-				searchWord = 'test';
-			}
-			const regex = new RegExp('\\s' + searchWord + '\\s|^' + searchWord + '\\s|\\s' + searchWord + '$|^' + searchWord + '$|\\s' + searchWord + '\\W|^' + searchWord + '\\W', 'i');
+			const searchWord = config.guilds[i].searchWord;
 			// const regex = /(\sword\s|^word\s|\sword$|^word$|\sword\W|^word\W)/i;
 			haveGuildInConfig = true;
 			// 60,000 is amount of ms in a minute
-			console.log(regex);
-			if (regex.test(message.content)) {
-				console.log('Message content is good');
-			}
-			if (regex.test(message.content) && Date.now() - config.guilds[i].timer > config.guilds[i].cooldownTimerMinutes * 60000) {
+			if (isMessageGood(message.content, searchWord) && Date.now() - config.guilds[i].timer > config.guilds[i].cooldownTimerMinutes * 60000) {
 				console.log('Should send message');
 				const timeSinceLastMessage = Date.now() - config.guilds[i].timer;
 				const responseMessage = 'Time since last ' + searchWord + ': ' + formattedTime(timeSinceLastMessage);
@@ -57,5 +46,19 @@ export function createMessage(message) {
 			}
 		});
 	}
+}
 
+function isMessageGood(message, searchWord) {
+	if(!searchWord) {
+		searchWord = 'test';
+	}
+	const regex = new RegExp('^.*?(?:\\s|^|\\W)(' + searchWord + ')(?=\\W|$).*', 'i');
+	return regex.test(message);
+}
+
+function formattedTime(lastMessageTime) {
+    return (Math.floor(lastMessageTime / 86400000) + ' days, ' +
+    Math.floor((lastMessageTime % 86400000) / 3600000) + ' hours, ' +
+    Math.floor((lastMessageTime % 3600000) / 60000) + ' minutes, ' +
+    Math.floor((lastMessageTime % 60000) / 1000) + ' seconds');
 }
